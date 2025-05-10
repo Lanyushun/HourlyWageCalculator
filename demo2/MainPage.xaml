@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:System="clr-namespace:System;assembly=System.Runtime"
+             x:Class="demo2.MainPage"
+             xmlns:local="clr-namespace:demo2.Data"
+             Title="小时工记账">
+    <ContentPage.Resources>
+        <Style TargetType="Label">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="Margin" Value="0,5" />
+        </Style>
+        <Style TargetType="Entry">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Margin" Value="0,5,0,10" />
+            <Setter Property="Keyboard" Value="Numeric" />
+        </Style>
+        <Style TargetType="DatePicker">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Margin" Value="0,5,0,10" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Margin" Value="0,15" />
+            <Setter Property="HeightRequest" Value="50" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BackgroundColor" Value="#2196F3" />
+            <Setter Property="TextColor" Value="White" />
+        </Style>
+    </ContentPage.Resources>
+    <ScrollView>
+        <VerticalStackLayout
+            Spacing="10"
+            Padding="30"
+            VerticalOptions="StartAndExpand"
+            HorizontalOptions="FillAndExpand">
+            <Label Text="选择日期:" />
+            <DatePicker x:Name="DateInput" Format="yyyy年MM月dd日" Date="{Binding Source={x:Static System:DateTime.Today}}" />
+            <Label Text="工作小时数 (小时):" />
+            <Entry x:Name="HoursWorkedEntry" Placeholder="请输入工作小时数" TextChanged="OnHoursOrRateChanged" />
+            <Label Text="每小时工资 (元):" />
+            <Entry x:Name="HourlyRateEntry" Placeholder="请输入每小时工资" TextChanged="OnHoursOrRateChanged" />
+            <Label Text="预计总收入:" />
+            <Label x:Name="TotalEarningsLabel" Text="0.00 元" FontAttributes="Bold" FontSize="24" TextColor="#4CAF50" />
+            <Button x:Name="RecordButton"
+                    Text="记录工时"
+                    Clicked="OnRecordButtonClicked" />
+            <Button x:Name="ViewHistoryButton"
+                    Text="查看历史记录"
+                    Clicked="OnViewHistoryButtonClicked" />
+            <!-- 在ViewHistoryButton下方添加这个按钮 -->
+            <Button x:Name="AboutButton"
+        Text="关于应用"
+        Margin="0,5"
+        BackgroundColor="#FF9800"
+        Clicked="OnAboutButtonClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

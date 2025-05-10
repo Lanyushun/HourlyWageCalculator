@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell  
+    x:Class="demo2.AppShell"  
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"  
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"  
+    xmlns:local="clr-namespace:demo2"  
+    xmlns:views="clr-namespace:demo2.Views" 
+    Shell.FlyoutBehavior="Disabled">
+    <ShellContent  
+        Title="记账"  
+        ContentTemplate="{DataTemplate local:MainPage}"  
+        Route="MainPage" />
+    <ShellContent  
+        Title="历史记录"  
+        ContentTemplate="{DataTemplate views:HistoryPage}"  
+        Route="HistoryPage" />
+    <ShellContent  
+        Title="关于"  
+        ContentTemplate="{DataTemplate views:AboutPage}"  
+        Route="AboutPage" />
+</Shell>

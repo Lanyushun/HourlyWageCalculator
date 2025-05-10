@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="demo2.Views.HistoryPage"
+             xmlns:models="clr-namespace:demo2.Models"
+             Title="历史记录">
+
+    <ContentPage.Resources>
+        <Style TargetType="Frame">
+            <Setter Property="BorderColor" Value="#EEEEEE" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="HasShadow" Value="True" />
+            <Setter Property="Padding" Value="15" />
+            <Setter Property="Margin" Value="0,5,0,5" />
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="HeaderLabelStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="#333333" />
+        </Style>
+        <Style x:Key="ValueLabelStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="#2196F3" />
+        </Style>
+        <Style x:Key="EarningsLabelStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="17" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="#4CAF50" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="CornerRadius" Value="5" />
+        </Style>
+        <Style TargetType="Picker">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Margin" Value="0,0,5,0" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="20">
+        <!-- 顶部导航区域 -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+            <Button Text="返回"
+                    Grid.Column="0"
+                    HorizontalOptions="Start"
+                    Margin="0,0,0,10"
+                    Clicked="OnBackButtonClicked" />
+
+            <Label Text="所有工时记录" 
+                   Grid.Column="1"
+                   Style="{StaticResource HeaderLabelStyle}" 
+                   HorizontalOptions="Center" 
+                   Margin="0,0,0,15" />
+        </Grid>
+
+        <!-- 日期筛选区域 -->
+        <Frame Grid.Row="1" Margin="0,0,0,10" Padding="10">
+            <StackLayout>
+                <Label Text="按日期筛选" FontAttributes="Bold" FontSize="16" TextColor="#333" Margin="0,0,0,10"/>
+
+                <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="5" RowSpacing="10">
+                    <!-- 年份选择器 -->
+                    <StackLayout Grid.Row="0" Grid.Column="0">
+                        <Label Text="年份" FontSize="12" Margin="5,0,0,0"/>
+                        <Picker x:Name="YearPicker" 
+                                SelectedIndexChanged="OnYearPickerSelectedIndexChanged"/>
+                    </StackLayout>
+
+                    <!-- 月份选择器 -->
+                    <StackLayout Grid.Row="0" Grid.Column="1">
+                        <Label Text="月份" FontSize="12" Margin="5,0,0,0"/>
+                        <Picker x:Name="MonthPicker" 
+                                SelectedIndexChanged="OnMonthPickerSelectedIndexChanged"/>
+                    </StackLayout>
+
+                    <!-- 日期选择器 -->
+                    <StackLayout Grid.Row="0" Grid.Column="2">
+                        <Label Text="日期" FontSize="12" Margin="5,0,0,0"/>
+                        <Picker x:Name="DayPicker" 
+                                SelectedIndexChanged="OnDayPickerSelectedIndexChanged"/>
+                    </StackLayout>
+
+                    <!-- 按钮行 -->
+                    <Grid Grid.Row="1" Grid.ColumnSpan="3" ColumnDefinitions="*,*,*" ColumnSpacing="5">
+                        <Button Text="筛选" 
+                                Grid.Column="0"
+                                BackgroundColor="#2196F3"
+                                TextColor="White"
+                                Clicked="OnFilterButtonClicked"/>
+
+                        <Button Text="重置筛选" 
+                                Grid.Column="1"
+                                BackgroundColor="#FFC107"
+                                TextColor="White"
+                                Clicked="OnResetFilterButtonClicked"/>
+
+                        <Button Text="查看统计" 
+                                Grid.Column="2"
+                                BackgroundColor="#4CAF50"
+                                TextColor="White"
+                                Clicked="OnViewStatsButtonClicked"/>
+                    </Grid>
+                </Grid>
+            </StackLayout>
+        </Frame>
+
+        <!-- 记录列表区域 -->
+        <RefreshView x:Name="HistoryRefreshView"
+                     Grid.Row="2"
+                     IsRefreshing="{Binding IsBusy}"
+                     RefreshColor="#2196F3"
+                     Command="{Binding RefreshCommand}"
+                     VerticalOptions="FillAndExpand">
+
+            <StackLayout>
+                <!-- 筛选状态和统计信息 -->
+                <Frame IsVisible="{Binding IsFiltered}" Padding="10" Margin="0,0,0,10" BackgroundColor="#E3F2FD">
+                    <StackLayout>
+                        <Label Text="{Binding FilterStatusText}" FontSize="14" TextColor="#0D47A1"/>
+                        <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding ShowStats}">
+                            <Label Text="总工时:" Grid.Column="0" FontAttributes="Bold"/>
+                            <Label Text="{Binding TotalHours, StringFormat='{0:F2} 小时'}" Grid.Column="1"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding ShowStats}">
+                            <Label Text="总收入:" Grid.Column="0" FontAttributes="Bold"/>
+                            <Label Text="{Binding TotalEarnings, StringFormat='{0:F2} 元'}" Grid.Column="1"/>
+                        </Grid>
+                    </StackLayout>
+                </Frame>
+
+                <!-- 工作记录列表 -->
+                <CollectionView x:Name="HistoryCollectionView"
+                                ItemsSource="{Binding FilteredWorkEntries}"
+                                SelectionMode="None"
+                                VerticalOptions="Fill">
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20">
+                            <Label Text="{Binding EmptyViewText}" HorizontalOptions="Center" FontSize="18" TextColor="Gray" />
+                            <Label Text="请返回主页面添加工时记录" HorizontalOptions="Center" FontSize="14" TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:WorkEntry">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItemView CommandParameter="{Binding .}"
+                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCommand}"
+                                                       BackgroundColor="Red">
+                                            <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+                                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="5">
+                                                    <Label Text="删除" TextColor="White" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </SwipeItemView>
+
+                                        <SwipeItemView CommandParameter="{Binding .}"
+                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}"
+                                                       BackgroundColor="Orange">
+                                            <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+                                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="5">
+                                                    <Label Text="编辑" TextColor="White" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </SwipeItemView>
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Frame>
+                                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                                        <Label Text="日期:" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeaderLabelStyle}" />
+                                        <Label Text="{Binding Date, StringFormat='{0:yyyy年MM月dd日}'}" Grid.Row="0" Grid.Column="1" Style="{StaticResource ValueLabelStyle}" />
+
+                                        <Label Text="工时:" Grid.Row="1" Grid.Column="0" Style="{StaticResource HeaderLabelStyle}" />
+                                        <Label Text="{Binding HoursWorked, StringFormat='{0:F2} 小时'}" Grid.Row="1" Grid.Column="1" Style="{StaticResource ValueLabelStyle}" />
+
+                                        <Label Text="时薪:" Grid.Row="2" Grid.Column="0" Style="{StaticResource HeaderLabelStyle}" />
+                                        <Label Text="{Binding HourlyRate, StringFormat='{0:F2} 元/小时'}" Grid.Row="2" Grid.Column="1" Style="{StaticResource ValueLabelStyle}" />
+
+                                        <Label Text="总收入:" Grid.Row="3" Grid.Column="0" Style="{StaticResource HeaderLabelStyle}" />
+                                        <Label Text="{Binding TotalEarnings, StringFormat='{0:F2} 元'}" Grid.Row="3" Grid.Column="1" Style="{StaticResource EarningsLabelStyle}" />
+                                    </Grid>
+                                </Frame>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+        </RefreshView>
+    </Grid>
+</ContentPage>
